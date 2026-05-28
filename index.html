@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ivey Behavioural Lab — Admin</title>
+  <style>
+    /* ── Reset & base ────────────────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0b1120;
+      --surface:   #111827;
+      --surface2:  #1e2a3b;
+      --border:    #1e293b;
+      --accent:    #3b82f6;
+      --accent-h:  #2563eb;
+      --danger:    #ef4444;
+      --danger-h:  #dc2626;
+      --success:   #22c55e;
+      --text:      #e2e8f0;
+      --muted:     #64748b;
+      --online:    #4ade80;
+      --offline:   #475569;
+      --card-sel:  #1e3a5f;
+      --radius:    10px;
+    }
+
+    html, body { height: 100%; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Typography ──────────────────────────────────────────────────────────── */
+    h1 { font-size: 20px; font-weight: 700; }
+    h2 { font-size: 13px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+
+    /* ── Layout ──────────────────────────────────────────────────────────────── */
+    .topbar {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 28px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .topbar-left  { display: flex; align-items: center; gap: 12px; }
+    .topbar-right { display: flex; align-items: center; gap: 16px; }
+
+    .logo {
+      height: 36px;
+      background: #fff;
+      border-radius: 6px;
+      padding: 4px 8px;
+      display: grid;
+      place-items: center;
+    }
+    .logo img { height: 28px; width: auto; display: block; }
+
+    .page-body {
+      flex: 1;
+      padding: 28px;
+      max-width: 1200px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    /* ── Connection badge ────────────────────────────────────────────────────── */
+    .conn-badge {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 12px;
+      font-weight: 600;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 99px;
+      padding: 5px 12px;
+    }
+    .conn-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--offline);
+    }
+    .conn-badge.live .conn-dot {
+      background: var(--online);
+      animation: pulse 1.8s infinite;
+    }
+    .conn-badge.live { color: var(--online); border-color: #166534; }
+    .conn-badge:not(.live) { color: var(--muted); }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(74,222,128,.4); }
+      50%       { opacity: .7; box-shadow: 0 0 0 4px rgba(74,222,128,0); }
+    }
+
+    /* ── Stats row ───────────────────────────────────────────────────────────── */
+    .stats {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 28px;
+      flex-wrap: wrap;
+    }
+
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 22px;
+      min-width: 150px;
+      flex: 1;
+    }
+    .stat-label { font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+    .stat-value { font-size: 28px; font-weight: 800; line-height: 1; }
+    .stat-value.blue   { color: var(--accent); }
+    .stat-value.green  { color: var(--online); }
+    .stat-value.yellow { color: #facc15; }
+
+    /* ── Section ─────────────────────────────────────────────────────────────── */
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    /* ── Workstation grid ────────────────────────────────────────────────────── */
+    .ws-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+
+    .ws-card {
+      background: var(--surface);
+      border: 2px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 14px 14px;
+      cursor: pointer;
+      user-select: none;
+      transition: border-color .15s, background .15s, transform .1s;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+    .ws-card:hover { border-color: #334155; transform: translateY(-1px); }
+    .ws-card.selected {
+      border-color: var(--accent);
+      background: var(--card-sel);
+    }
+    .ws-card.offline { opacity: .55; }
+
+    .ws-checkbox {
+      position: absolute;
+      top: 10px; right: 10px;
+      width: 16px; height: 16px;
+      accent-color: var(--accent);
+    }
+
+    .ws-icon {
+      width: 36px; height: 36px;
+      background: var(--surface2);
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+    }
+    .ws-card.online-card .ws-icon { background: #052e16; }
+
+    .ws-number { font-size: 18px; font-weight: 800; }
+
+    .ws-status {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .ws-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+    }
+    .online-card  .ws-dot { background: var(--online); animation: pulse 1.8s infinite; }
+    .offline-card .ws-dot { background: var(--offline); }
+    .online-card  .ws-status { color: var(--online); }
+    .offline-card .ws-status { color: var(--muted); }
+
+    .ws-lastseen {
+      font-size: 10px;
+      color: var(--muted);
+    }
+
+    /* ── Empty state ─────────────────────────────────────────────────────────── */
+    .empty-state {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 48px 0;
+      color: var(--muted);
+    }
+    .empty-state svg { margin-bottom: 12px; opacity: .3; }
+    .empty-state p { font-size: 14px; }
+
+    /* ── Action bar ──────────────────────────────────────────────────────────── */
+    .action-bar {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .action-bar-left  { display: flex; gap: 8px; flex-wrap: wrap; }
+    .action-bar-right { display: flex; gap: 8px; margin-left: auto; flex-wrap: wrap; }
+
+    /* ── Buttons ─────────────────────────────────────────────────────────────── */
+    button {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 13px;
+      font-weight: 600;
+      border: none;
+      border-radius: 7px;
+      padding: 8px 14px;
+      cursor: pointer;
+      transition: background .15s, opacity .15s, transform .1s;
+      font-family: inherit;
+      white-space: nowrap;
+    }
+    button:active { transform: scale(.97); }
+    button:disabled { opacity: .4; cursor: not-allowed; transform: none; }
+
+    .btn-ghost {
+      background: var(--surface2);
+      color: var(--muted);
+      border: 1px solid var(--border);
+    }
+    .btn-ghost:hover:not(:disabled) { background: #263548; color: var(--text); }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+    }
+    .btn-primary:hover:not(:disabled) { background: var(--accent-h); }
+
+    .btn-danger {
+      background: rgba(239,68,68,.15);
+      color: var(--danger);
+      border: 1px solid rgba(239,68,68,.25);
+    }
+    .btn-danger:hover:not(:disabled) { background: rgba(239,68,68,.25); }
+
+    .selection-info {
+      font-size: 12px;
+      color: var(--muted);
+      padding: 0 4px;
+    }
+    .selection-info span { color: var(--text); font-weight: 700; }
+
+    /* ── Modal ───────────────────────────────────────────────────────────────── */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.65);
+      backdrop-filter: blur(4px);
+      display: none;
+      place-items: center;
+      z-index: 200;
+    }
+    .modal-overlay.open { display: grid; }
+
+    .modal {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 28px;
+      width: 420px;
+      max-width: calc(100vw - 40px);
+      box-shadow: 0 25px 60px rgba(0,0,0,.5);
+    }
+    .modal h3 { font-size: 16px; margin-bottom: 8px; }
+    .modal p  { font-size: 13px; color: var(--muted); margin-bottom: 20px; }
+
+    .modal-target-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 20px;
+    }
+    .target-chip {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 4px 10px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--accent);
+    }
+
+    .modal input[type="url"],
+    .modal input[type="text"] {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      color: var(--text);
+      font-size: 14px;
+      font-family: inherit;
+      padding: 10px 12px;
+      outline: none;
+      margin-bottom: 20px;
+      transition: border-color .15s;
+    }
+    .modal input:focus { border-color: var(--accent); }
+    .modal input::placeholder { color: var(--muted); }
+
+    .modal-actions { display: flex; gap: 8px; justify-content: flex-end; }
+
+    /* ── Toast ───────────────────────────────────────────────────────────────── */
+    #toast {
+      position: fixed;
+      bottom: 28px;
+      right: 28px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      padding: 12px 18px;
+      font-size: 13px;
+      box-shadow: 0 8px 24px rgba(0,0,0,.4);
+      transform: translateY(80px);
+      opacity: 0;
+      transition: transform .25s, opacity .25s;
+      z-index: 300;
+      max-width: 320px;
+    }
+    #toast.show { transform: translateY(0); opacity: 1; }
+    #toast.ok  { border-left: 3px solid var(--success); }
+    #toast.err { border-left: 3px solid var(--danger); }
+  </style>
+</head>
+<body>
+
+<!-- ── Top bar ──────────────────────────────────────────────────────────────── -->
+<header class="topbar">
+  <div class="topbar-left">
+    <div class="logo">
+      <img src="https://www.ivey.uwo.ca/images/template/ivey-main-logo.svg" alt="Ivey Business School" />
+    </div>
+    <h1>Admin - Workstation Manager</h1>
+  </div>
+  <div class="topbar-right">
+    <div class="conn-badge" id="conn-badge">
+      <div class="conn-dot"></div>
+      <span id="conn-text">Connecting…</span>
+    </div>
+    <button class="btn-ghost" id="btn-ping" title="Ask all extensions to re-register">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21.5 2v6h-6"/><path d="M21.34 15.57a10 10 0 1 1-.57-8.38"/>
+      </svg>
+      Refresh
+    </button>
+  </div>
+</header>
+
+<!-- ── Page body ────────────────────────────────────────────────────────────── -->
+<main class="page-body">
+
+  <!-- Stats -->
+  <div class="stats">
+    <div class="stat-card">
+      <div class="stat-label">Total Workstations</div>
+      <div class="stat-value blue" id="stat-total">0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Online Now</div>
+      <div class="stat-value green" id="stat-online">0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Offline</div>
+      <div class="stat-value yellow" id="stat-offline">0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Selected</div>
+      <div class="stat-value" id="stat-selected" style="color:var(--text)">0</div>
+    </div>
+  </div>
+
+  <!-- Workstation grid -->
+  <div class="section-header">
+    <h2>Workstations</h2>
+  </div>
+
+  <div class="ws-grid" id="ws-grid">
+    <div class="empty-state">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="3" width="20" height="14" rx="2"/>
+        <path d="M8 21h8M12 17v4"/>
+      </svg>
+      <p>Waiting for workstations to connect…</p>
+    </div>
+  </div>
+
+  <!-- Action bar -->
+  <div class="action-bar">
+    <div class="action-bar-left">
+      <button class="btn-ghost" id="btn-select-all">Select All Online</button>
+      <button class="btn-ghost" id="btn-deselect">Deselect All</button>
+      <span class="selection-info" id="sel-info">
+        <span id="sel-count">0</span> workstations selected
+      </span>
+    </div>
+    <div class="action-bar-right">
+      <button class="btn-danger" id="btn-clear-cache" disabled>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="3 6 5 6 21 6"/>
+          <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+          <path d="M10 11v6M14 11v6"/>
+          <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+        </svg>
+        Clear Cache
+      </button>
+      <button class="btn-primary" id="btn-open-url" disabled>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+          <polyline points="15 3 21 3 21 9"/>
+          <line x1="10" y1="14" x2="21" y2="3"/>
+        </svg>
+        Open URL
+      </button>
+    </div>
+  </div>
+
+</main>
+
+<!-- ── Open URL modal ───────────────────────────────────────────────────────── -->
+<div class="modal-overlay" id="modal-url">
+  <div class="modal">
+    <h3>Open URL on Selected Workstations</h3>
+    <p>The URL will open on each selected workstation with its <code>?wnum=N</code> appended automatically.</p>
+    <div class="modal-target-list" id="modal-targets"></div>
+    <input type="url" id="url-input" placeholder="https://example.com" autocomplete="off" />
+    <div class="modal-actions">
+      <button class="btn-ghost" id="modal-cancel">Cancel</button>
+      <button class="btn-primary" id="modal-confirm">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+          <polyline points="15 3 21 3 21 9"/>
+          <line x1="10" y1="14" x2="21" y2="3"/>
+        </svg>
+        Open
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Toast ────────────────────────────────────────────────────────────────── -->
+<div id="toast"></div>
+
+<!-- ── Script ───────────────────────────────────────────────────────────────── -->
+<script>
+  // ── CONFIGURE THESE to match chrome-extension/config.js ──────────────────
+  const PIESOCKET_API_KEY = 'RqBtHOA9dF0XciTCLHYRuY4LMAh7BnXtMtuOPFqF';
+  const PIESOCKET_CLUSTER = 'free.blr2';
+  const PIESOCKET_CHANNEL = 'lab-manager-001';
+  const OFFLINE_THRESHOLD_SEC = 20;
+  // ─────────────────────────────────────────────────────────────────────────
+
+  // workstations: Map<number, { lastSeen: Date, name: string }>
+  const workstations = new Map();
+  const selected = new Set();
+
+  let ws = null;
+
+  // ── WebSocket ─────────────────────────────────────────────────────────────
+
+  function connect() {
+    const url = `wss://${PIESOCKET_CLUSTER}.piesocket.com/v3/${PIESOCKET_CHANNEL}?api_key=${PIESOCKET_API_KEY}&notify_self=0`;
+    ws = new WebSocket(url);
+
+    ws.onopen = () => {
+      setBadge(true);
+      ping(); // ask all extensions to announce themselves
+    };
+
+    ws.onmessage = ({ data }) => {
+      try { handleMessage(JSON.parse(data)); } catch {}
+    };
+
+    ws.onclose = () => {
+      setBadge(false);
+      setTimeout(connect, 4000);
+    };
+
+    ws.onerror = () => ws.close();
+  }
+
+  function send(payload) {
+    if (ws?.readyState === WebSocket.OPEN) {
+      ws.send(JSON.stringify({ ...payload, from: 'admin' }));
+    }
+  }
+
+  function ping() {
+    send({ type: 'ping' });
+  }
+
+  // ── Message handling ──────────────────────────────────────────────────────
+
+  function handleMessage(msg) {
+    if (msg.from !== 'extension') return;
+
+    if (msg.type === 'register' || msg.type === 'heartbeat') {
+      const wnum = Number(msg.wnum);
+      if (!wnum || wnum < 1) return;
+      workstations.set(wnum, { lastSeen: new Date() });
+      renderGrid();
+    }
+
+    if (msg.type === 'ack') {
+      const label = msg.cmd === 'clear_cache' ? 'Cache cleared' : 'URL opened';
+      toast(`WS ${msg.wnum}: ${label}`, 'ok');
+    }
+  }
+
+  // ── UI helpers ────────────────────────────────────────────────────────────
+
+  function setBadge(live) {
+    const badge = document.getElementById('conn-badge');
+    const text  = document.getElementById('conn-text');
+    badge.className = live ? 'conn-badge live' : 'conn-badge';
+    text.textContent = live ? 'Connected to PieSocket' : 'Disconnected';
+  }
+
+  function isOnline(ws_entry) {
+    const ageSec = (Date.now() - ws_entry.lastSeen.getTime()) / 1000;
+    return ageSec <= OFFLINE_THRESHOLD_SEC;
+  }
+
+  function timeSince(date) {
+    const s = Math.floor((Date.now() - date.getTime()) / 1000);
+    if (s < 5)  return 'just now';
+    if (s < 60) return `${s}s ago`;
+    return `${Math.floor(s/60)}m ago`;
+  }
+
+  function renderGrid() {
+    const grid = document.getElementById('ws-grid');
+
+    if (workstations.size === 0) {
+      grid.innerHTML = `
+        <div class="empty-state">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="3" width="20" height="14" rx="2"/>
+            <path d="M8 21h8M12 17v4"/>
+          </svg>
+          <p>Waiting for workstations to connect…</p>
+        </div>`;
+      updateStats();
+      return;
+    }
+
+    const sorted = [...workstations.keys()].sort((a, b) => a - b);
+
+    grid.innerHTML = sorted.map(wnum => {
+      const entry   = workstations.get(wnum);
+      const online  = isOnline(entry);
+      const sel     = selected.has(wnum);
+      const cardCls = ['ws-card', online ? 'online-card' : 'offline-card', sel ? 'selected' : ''].join(' ');
+      return `
+        <div class="${cardCls}" data-wnum="${wnum}" title="Workstation ${wnum}">
+          <input type="checkbox" class="ws-checkbox" ${sel ? 'checked' : ''} data-wnum="${wnum}" />
+          <div class="ws-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                 stroke="${online ? '#4ade80' : '#475569'}" stroke-width="2"
+                 stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="3" width="20" height="14" rx="2"/>
+              <path d="M8 21h8M12 17v4"/>
+            </svg>
+          </div>
+          <div class="ws-number">WS ${wnum}</div>
+          <div class="ws-status">
+            <span class="ws-dot"></span>
+            ${online ? 'Online' : 'Offline'}
+          </div>
+          <div class="ws-lastseen">${timeSince(entry.lastSeen)}</div>
+        </div>`;
+    }).join('');
+
+    // Wire up card / checkbox clicks
+    grid.querySelectorAll('.ws-card').forEach(card => {
+      card.addEventListener('click', (e) => {
+        if (e.target.type === 'checkbox') return; // handled below
+        const wnum = Number(card.dataset.wnum);
+        toggleSelect(wnum);
+      });
+    });
+
+    grid.querySelectorAll('.ws-checkbox').forEach(cb => {
+      cb.addEventListener('change', () => {
+        const wnum = Number(cb.dataset.wnum);
+        if (cb.checked) selected.add(wnum);
+        else            selected.delete(wnum);
+        syncSelection();
+      });
+    });
+
+    updateStats();
+  }
+
+  function toggleSelect(wnum) {
+    if (selected.has(wnum)) selected.delete(wnum);
+    else                    selected.add(wnum);
+    syncSelection();
+  }
+
+  function syncSelection() {
+    // Prune stale selections
+    for (const wnum of selected) {
+      if (!workstations.has(wnum)) selected.delete(wnum);
+    }
+    renderGrid();
+    updateActionBar();
+  }
+
+  function updateStats() {
+    const total   = workstations.size;
+    const online  = [...workstations.values()].filter(isOnline).length;
+    document.getElementById('stat-total').textContent   = total;
+    document.getElementById('stat-online').textContent  = online;
+    document.getElementById('stat-offline').textContent = total - online;
+    document.getElementById('stat-selected').textContent = selected.size;
+    updateActionBar();
+  }
+
+  function updateActionBar() {
+    const hasSelection = selected.size > 0;
+    document.getElementById('btn-clear-cache').disabled = !hasSelection;
+    document.getElementById('btn-open-url').disabled    = !hasSelection;
+    document.getElementById('sel-count').textContent    = selected.size;
+  }
+
+  // ── Button actions ────────────────────────────────────────────────────────
+
+  document.getElementById('btn-ping').addEventListener('click', () => {
+    ping();
+    toast('Sent refresh signal to all workstations', 'ok');
+  });
+
+  document.getElementById('btn-select-all').addEventListener('click', () => {
+    for (const [wnum, entry] of workstations) {
+      if (isOnline(entry)) selected.add(wnum);
+    }
+    syncSelection();
+  });
+
+  document.getElementById('btn-deselect').addEventListener('click', () => {
+    selected.clear();
+    syncSelection();
+  });
+
+  document.getElementById('btn-clear-cache').addEventListener('click', () => {
+    if (selected.size === 0) return;
+    const targets = [...selected];
+    send({ type: 'clear_cache', targets });
+    toast(`Clear cache sent to WS [${targets.join(', ')}]`, 'ok');
+  });
+
+  // ── Open URL modal ────────────────────────────────────────────────────────
+
+  document.getElementById('btn-open-url').addEventListener('click', () => {
+    if (selected.size === 0) return;
+    const list = document.getElementById('modal-targets');
+    list.innerHTML = [...selected].sort((a,b)=>a-b)
+      .map(n => `<span class="target-chip">WS ${n}</span>`).join('');
+    document.getElementById('url-input').value = '';
+    document.getElementById('modal-url').classList.add('open');
+    setTimeout(() => document.getElementById('url-input').focus(), 80);
+  });
+
+  document.getElementById('modal-cancel').addEventListener('click', closeModal);
+
+  document.getElementById('modal-confirm').addEventListener('click', () => {
+    const raw = document.getElementById('url-input').value.trim();
+    if (!raw) {
+      document.getElementById('url-input').focus();
+      return;
+    }
+    const targets = [...selected];
+    send({ type: 'open_url', targets, url: raw });
+    toast(`Open URL sent to WS [${targets.join(', ')}]`, 'ok');
+    closeModal();
+  });
+
+  document.getElementById('url-input').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') document.getElementById('modal-confirm').click();
+    if (e.key === 'Escape') closeModal();
+  });
+
+  document.getElementById('modal-url').addEventListener('click', (e) => {
+    if (e.target === e.currentTarget) closeModal();
+  });
+
+  function closeModal() {
+    document.getElementById('modal-url').classList.remove('open');
+  }
+
+  // ── Toast ─────────────────────────────────────────────────────────────────
+
+  let toastTimer = null;
+  function toast(msg, type = 'ok') {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.className = `show ${type}`;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => { el.className = ''; }, 3200);
+  }
+
+  // ── Periodic UI refresh (update "X seconds ago" labels) ───────────────────
+
+  setInterval(() => {
+    if (workstations.size > 0) renderGrid();
+  }, 3000);
+
+  // ── Boot ──────────────────────────────────────────────────────────────────
+  connect();
+</script>
+</body>
+</html>
