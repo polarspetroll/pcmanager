@@ -1,0 +1,14 @@
+{
+  "manifest_version": 3,
+  "name": "Lab Remote URL Opener",
+  "version": "1.0",
+  "description": "Opens survey URLs pushed from admin panel",
+  "permissions": ["alarms", "tabs", "storage"],
+  "incognito": "spanning",
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html"
+  }
+}

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body { width: 280px; padding: 12px; font-family: system-ui; font-size: 13px; }
+    input { width: 100%; padding: 6px; margin: 6px 0; box-sizing: border-box; }
+    button { padding: 6px 12px; cursor: pointer; }
+    .status { margin-top: 8px; color: #666; font-size: 12px; }
+  </style>
+</head>
+<body>
+  <strong>Lab Remote Opener</strong>
+  <p>Server URL:</p>
+  <input type="text" id="server" placeholder="http://192.168.1.100:3000">
+  <button id="save">Save</button>
+  <div class="status" id="status"></div>
+
+  <script>
+    chrome.storage.local.get("serverUrl", (d) => {
+      document.getElementById("server").value = d.serverUrl || "";
+    });
+    document.getElementById("save").onclick = () => {
+      const url = document.getElementById("server").value.replace(/\/+$/, "");
+      chrome.storage.local.set({ serverUrl: url });
+      document.getElementById("status").textContent = "Saved!";
+    };
+  </script>
+</body>
+</html>
