@@ -1,29 +1,106 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lab PC Manager</title>
   <style>
-    body { width: 280px; padding: 12px; font-family: system-ui; font-size: 13px; }
-    input { width: 100%; padding: 6px; margin: 6px 0; box-sizing: border-box; }
-    button { padding: 6px 12px; cursor: pointer; }
-    .status { margin-top: 8px; color: #666; font-size: 12px; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      width: 240px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #0f172a;
+      color: #e2e8f0;
+    }
+
+    .header {
+      background: #1e3a5f;
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .header svg { flex-shrink: 0; }
+    .header-text { line-height: 1.2; }
+    .header-title { font-size: 13px; font-weight: 700; color: #93c5fd; }
+    .header-sub   { font-size: 11px; color: #64748b; }
+
+    .body { padding: 14px 16px; display: flex; flex-direction: column; gap: 12px; }
+
+    .row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 12px;
+    }
+    .label { color: #94a3b8; }
+    .value { font-weight: 600; color: #e2e8f0; }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 99px;
+    }
+    .badge.online  { background: #052e16; color: #4ade80; }
+    .badge.offline { background: #1c1917; color: #78716c; }
+
+    .dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+    }
+    .online  .dot { background: #4ade80; animation: pulse 1.5s infinite; }
+    .offline .dot { background: #78716c; }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.4; }
+    }
+
+    .wnum-box {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .wnum-label { font-size: 11px; color: #64748b; text-transform: uppercase; letter-spacing: .05em; }
+    .wnum-value { font-size: 24px; font-weight: 800; color: #38bdf8; }
   </style>
 </head>
 <body>
-  <strong>Lab Remote Opener</strong>
-  <p>Server URL:</p>
-  <input type="text" id="server" placeholder="http://192.168.1.100:3000">
-  <button id="save">Save</button>
-  <div class="status" id="status"></div>
+  <div class="header">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#93c5fd" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="2" y="3" width="20" height="14" rx="2"/>
+      <path d="M8 21h8M12 17v4"/>
+    </svg>
+    <div class="header-text">
+      <div class="header-title">Lab PC Manager</div>
+      <div class="header-sub">Workstation Agent</div>
+    </div>
+  </div>
 
-  <script>
-    chrome.storage.local.get("serverUrl", (d) => {
-      document.getElementById("server").value = d.serverUrl || "";
-    });
-    document.getElementById("save").onclick = () => {
-      const url = document.getElementById("server").value.replace(/\/+$/, "");
-      chrome.storage.local.set({ serverUrl: url });
-      document.getElementById("status").textContent = "Saved!";
-    };
-  </script>
+  <div class="body">
+    <div class="wnum-box">
+      <div class="wnum-label">Workstation #</div>
+      <div class="wnum-value" id="wnum">—</div>
+    </div>
+
+    <div class="row">
+      <span class="label">Admin connection</span>
+      <span class="badge offline" id="status-badge">
+        <span class="dot"></span>
+        <span id="status-text">Offline</span>
+      </span>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
 </body>
 </html>

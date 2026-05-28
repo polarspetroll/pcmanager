@@ -1,14 +1,33 @@
 {
   "manifest_version": 3,
-  "name": "Lab Remote URL Opener",
-  "version": "1.0",
-  "description": "Opens survey URLs pushed from admin panel",
-  "permissions": ["alarms", "tabs", "storage"],
-  "incognito": "spanning",
+  "name": "Lab PC Manager",
+  "version": "1.0.0",
+  "description": "Connects this workstation to the lab admin panel via WebSocket.",
+
+  "permissions": [
+    "browsingData",
+    "tabs",
+    "alarms",
+    "storage"
+  ],
+
+  "host_permissions": [
+    "wss://free.blr2.piesocket.com/*"
+  ],
+
   "background": {
-    "service_worker": "background.js"
+    "service_worker": "background.js",
+    "type": "module"
   },
+
   "action": {
-    "default_popup": "popup.html"
+    "default_popup": "popup.html",
+    "default_title": "Lab PC Manager"
+  },
+
+  "icons": {
+    "16":  "icons/icon16.png",
+    "48":  "icons/icon48.png",
+    "128": "icons/icon128.png"
   }
 }
