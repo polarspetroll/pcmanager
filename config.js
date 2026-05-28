@@ -4,7 +4,7 @@
 
 export const CONFIG = {
   // Change this to a unique number for every PC in the lab (1–99)
-  WORKSTATION_NUMBER: 22,
+  WORKSTATION_NUMBER: 21,
 
   // PieSocket credentials
   PIESOCKET_API_KEY: "RqBtHOA9dF0XciTCLHYRuY4LMAh7BnXtMtuOPFqF",
